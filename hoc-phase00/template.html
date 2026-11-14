@@ -1,0 +1,700 @@
+<title>Sổ học Phase 00</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: sổ tay kỹ thuật kiểu bản vẽ (blueprint) — mục lục bài bên trái, cột đọc ~68ch ở giữa, mục lục mục bên phải trên màn rộng. */
+:root {
+  --bg: #f5f6fa;
+  --bg-surface: #eaedf6;
+  --bg-raised: #ffffff;
+  --ink: #151a2c;
+  --ink-soft: #454c66;
+  --ink-mute: #6d7490;
+  --rule-soft: #d7dbea;
+  --rule: #c3c9de;
+  --blueprint: #2a45d4;
+  --blueprint-wash: #e3e8ff;
+  --warn: #a2700a;
+  --ok: #17784a;
+  --ok-wash: #def3e8;
+  --bad: #b23a33;
+  --bad-wash: #fbe5e3;
+  --code-bg: #eceff8;
+  --syn-kw: #7a2fbf;
+  --syn-str: #17784a;
+  --syn-com: #7d84a0;
+  --syn-num: #b4540c;
+  --syn-fn: #2a45d4;
+  --font-body: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --ease-out: cubic-bezier(.23,1,.32,1);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1120; --bg-surface: #161a2c; --bg-raised: #1a1f33; --ink: #e5e8f3; --ink-soft: #b2b8cf; --ink-mute: #8a91ab;
+    --rule-soft: #272d45; --rule: #343b58; --blueprint: #8fa2ff; --blueprint-wash: #1f2850; --warn: #e2b14b;
+    --ok: #5cc68f; --ok-wash: #15301f; --bad: #f08079; --bad-wash: #3a1b1b; --code-bg: #131729;
+    --syn-kw: #c79bff; --syn-str: #7fd6a4; --syn-com: #7a819c; --syn-num: #f2a56a; --syn-fn: #9fb1ff;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1120; --bg-surface: #161a2c; --bg-raised: #1a1f33; --ink: #e5e8f3; --ink-soft: #b2b8cf; --ink-mute: #8a91ab;
+  --rule-soft: #272d45; --rule: #343b58; --blueprint: #8fa2ff; --blueprint-wash: #1f2850; --warn: #e2b14b;
+  --ok: #5cc68f; --ok-wash: #15301f; --bad: #f08079; --bad-wash: #3a1b1b; --code-bg: #131729;
+  --syn-kw: #c79bff; --syn-str: #7fd6a4; --syn-com: #7a819c; --syn-num: #f2a56a; --syn-fn: #9fb1ff;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-padding-top: calc(72px + env(safe-area-inset-top, 0px)); }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 16px; line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 50; background: var(--bg); }
+a { color: var(--blueprint); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+:focus-visible { outline: 2px solid var(--blueprint); outline-offset: 2px; border-radius: 3px; }
+button { font: inherit; color: inherit; }
+
+.app { display: grid; grid-template-columns: 284px minmax(0, 1fr); min-height: 100vh; }
+
+/* ---------- Sidebar ---------- */
+.side {
+  position: sticky; top: env(safe-area-inset-top, 0px); height: 100vh; overflow-y: auto;
+  border-right: 1px solid var(--rule-soft); background: var(--bg-surface);
+  padding-block: 20px 28px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: 16px;
+  display: flex; flex-direction: column; gap: 18px;
+}
+.brand { display: flex; flex-direction: column; gap: 2px; text-decoration: none; color: var(--ink); padding: 4px 8px; border-radius: 6px; }
+.brand:hover { background: var(--bg-raised); }
+.brand small { font-family: var(--font-mono); font-size: .68rem; letter-spacing: .14em; text-transform: uppercase; color: var(--blueprint); }
+.brand b { font-size: 1.08rem; font-weight: 700; line-height: 1.3; }
+.side-progress { padding: 0 8px; display: grid; gap: 6px; }
+.side-progress .row { display: flex; justify-content: space-between; font-size: .8rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.bar { height: 6px; border-radius: 99px; background: var(--rule-soft); overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--blueprint); border-radius: inherit; transition: width .4s var(--ease-out); }
+.nav { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.nav a {
+  display: grid; grid-template-columns: 44px 1fr 16px; align-items: center; gap: 6px;
+  padding: 7px 8px; border-radius: 6px; text-decoration: none; color: var(--ink-soft); font-size: .9rem; line-height: 1.35;
+}
+.nav a:hover { background: var(--bg-raised); color: var(--ink); }
+.nav a[aria-current="page"] { background: var(--bg-raised); color: var(--ink); box-shadow: inset 2px 0 0 var(--blueprint); }
+.nav .num { font-family: var(--font-mono); font-size: .74rem; color: var(--ink-mute); font-variant-numeric: tabular-nums; }
+.nav .dot { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--rule); justify-self: end; }
+.nav .done .dot { border-color: var(--ok); background: var(--ok); box-shadow: inset 0 0 0 2.5px var(--bg-surface); }
+.side-foot { margin-top: auto; font-size: .76rem; color: var(--ink-mute); padding: 0 8px; line-height: 1.5; }
+
+/* ---------- Main ---------- */
+.main { min-width: 0; display: flex; flex-direction: column; }
+.topbar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+  display: flex; align-items: center; gap: 10px; min-height: 56px;
+  padding-block: 8px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--rule-soft);
+}
+.menu-btn { display: none; border: 1px solid var(--rule); background: var(--bg-raised); border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: .85rem; }
+.crumb { font-family: var(--font-mono); font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; }
+.crumb b { color: var(--ink); font-weight: 500; }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 7px; overflow: hidden; background: var(--bg-raised); flex-shrink: 0; }
+.seg button { border: 0; background: none; padding: 5px 11px; font-size: .8rem; cursor: pointer; color: var(--ink-soft); }
+.seg button[aria-pressed="true"] { background: var(--blueprint); color: var(--bg); }
+
+.wrap { display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; padding-block: 32px 80px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); max-width: 1180px; width: 100%; margin: 0 auto; }
+.wrap.has-toc { grid-template-columns: minmax(0, 1fr) 220px; }
+.col { min-width: 0; max-width: 720px; width: 100%; margin: 0 auto; }
+
+/* ---------- Lesson header ---------- */
+.lhead { display: grid; gap: 14px; margin-bottom: 26px; }
+.eyebrow { font-family: var(--font-mono); font-size: .74rem; letter-spacing: .14em; text-transform: uppercase; color: var(--blueprint); display: flex; gap: 10px; flex-wrap: wrap; }
+.eyebrow span + span::before { content: "/"; margin-right: 10px; color: var(--ink-mute); }
+.lhead h1 { font-size: clamp(1.8rem, 1.3rem + 2vw, 2.5rem); line-height: 1.15; margin: 0; font-weight: 800; letter-spacing: -.02em; text-wrap: balance; }
+.tagline { margin: 0; font-size: 1.12rem; color: var(--ink-soft); line-height: 1.55; text-wrap: pretty; }
+.meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; background: var(--rule-soft); border: 1px solid var(--rule-soft); border-radius: 8px; overflow: hidden; }
+.meta div { background: var(--bg-raised); padding: 9px 12px; display: grid; gap: 1px; min-width: 0; }
+.meta dt { font-family: var(--font-mono); font-size: .66rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-mute); }
+.meta dd { margin: 0; font-size: .88rem; line-height: 1.4; }
+
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--rule-soft); margin-bottom: 28px; overflow-x: auto; }
+.tabs button { border: 0; background: none; padding: 10px 14px; cursor: pointer; font-size: .92rem; color: var(--ink-soft); border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+.tabs button:hover { color: var(--ink); }
+.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--blueprint); font-weight: 600; }
+.tabs .count { font-family: var(--font-mono); font-size: .72rem; color: var(--ink-mute); margin-left: 4px; }
+
+/* ---------- Prose ---------- */
+.prose { font-size: 1.02rem; }
+.prose > * + * { margin-top: 1em; }
+.prose h2 { font-size: 1.5rem; line-height: 1.25; margin: 2.2em 0 .2em; font-weight: 700; letter-spacing: -.01em; text-wrap: balance; padding-top: .9em; border-top: 1px solid var(--rule-soft); }
+.prose h3 { font-size: 1.17rem; line-height: 1.3; margin: 1.8em 0 .1em; font-weight: 650; text-wrap: balance; }
+.prose h4 { font-size: 1rem; margin: 1.5em 0 0; }
+.prose p, .prose li { text-wrap: pretty; }
+.prose ul, .prose ol { padding-left: 1.4em; }
+.prose li + li { margin-top: .35em; }
+.prose li::marker { color: var(--ink-mute); }
+.prose strong { font-weight: 650; }
+.prose blockquote { margin-left: 0; margin-right: 0; padding: 10px 16px; border-left: 3px solid var(--blueprint); background: var(--blueprint-wash); border-radius: 0 6px 6px 0; color: var(--ink); }
+.prose blockquote > :first-child { margin-top: 0; } .prose blockquote > :last-child { margin-bottom: 0; }
+.prose hr { border: 0; border-top: 1px solid var(--rule-soft); margin: 2em 0; }
+.prose :not(pre) > code { font-family: var(--font-mono); font-size: .86em; background: var(--code-bg); border: 1px solid var(--rule-soft); padding: .08em .35em; border-radius: 4px; overflow-wrap: anywhere; }
+.prose .table-wrap { overflow-x: auto; border: 1px solid var(--rule-soft); border-radius: 8px; }
+.prose table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+.prose th, .prose td { text-align: left; vertical-align: top; padding: 8px 12px; border-bottom: 1px solid var(--rule-soft); }
+.prose th { background: var(--bg-surface); font-weight: 600; font-size: .82rem; }
+.prose tr:last-child td { border-bottom: 0; }
+.prose img { max-width: 100%; }
+
+.code { border: 1px solid var(--rule-soft); border-radius: 8px; background: var(--code-bg); overflow: hidden; }
+.code-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 4px 6px 4px 12px; border-bottom: 1px solid var(--rule-soft); font-family: var(--font-mono); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mute); }
+.copy { border: 0; background: none; cursor: pointer; font-family: var(--font-mono); font-size: .7rem; letter-spacing: .06em; padding: 6px 8px; border-radius: 5px; color: var(--ink-soft); min-height: 32px; }
+.copy:hover { background: var(--bg-raised); color: var(--blueprint); }
+.code pre { margin: 0; padding: 14px 16px; overflow-x: auto; font-family: var(--font-mono); font-size: .84rem; line-height: 1.6; tab-size: 4; }
+.code pre code { font-family: inherit; background: none; border: 0; padding: 0; }
+.hljs-keyword, .hljs-built_in, .hljs-selector-tag, .hljs-meta .hljs-keyword, .hljs-type { color: var(--syn-kw); }
+.hljs-string, .hljs-attr .hljs-string, .hljs-regexp, .hljs-addition { color: var(--syn-str); }
+.hljs-comment, .hljs-quote, .hljs-meta { color: var(--syn-com); font-style: italic; }
+.hljs-number, .hljs-literal, .hljs-variable, .hljs-template-variable, .hljs-symbol, .hljs-deletion { color: var(--syn-num); }
+.hljs-title, .hljs-function .hljs-title, .hljs-title.function_, .hljs-section, .hljs-attr, .hljs-attribute, .hljs-name { color: var(--syn-fn); }
+
+.prose pre.mermaid { background: var(--bg-raised); border: 1px solid var(--rule-soft); border-radius: 8px; padding: 16px; text-align: center; overflow-x: auto; font-family: var(--font-mono); font-size: .8rem; white-space: pre; }
+.prose pre.mermaid[data-processed] { white-space: normal; }
+.prose pre.mermaid svg { max-width: 100%; height: auto; }
+.prose .lesson-figure { border-radius: 8px; overflow: hidden; }
+
+/* ---------- TOC ---------- */
+.toc { position: sticky; top: calc(76px + env(safe-area-inset-top, 0px)); align-self: start; max-height: calc(100vh - 100px); overflow-y: auto; font-size: .84rem; }
+.toc h2 { font-family: var(--font-mono); font-size: .68rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-mute); margin: 0 0 10px; font-weight: 500; }
+.toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; border-left: 1px solid var(--rule-soft); }
+.toc a { display: block; padding: 4px 10px; color: var(--ink-soft); text-decoration: none; line-height: 1.4; margin-left: -1px; border-left: 2px solid transparent; }
+.toc a.h3 { padding-left: 22px; font-size: .8rem; }
+.toc a:hover { color: var(--ink); }
+.toc a.active { color: var(--blueprint); border-left-color: var(--blueprint); }
+.toc-inline { display: none; border: 1px solid var(--rule-soft); border-radius: 8px; background: var(--bg-raised); margin-bottom: 24px; font-size: .9rem; }
+.toc-inline summary { padding: 10px 14px; cursor: pointer; font-weight: 600; }
+.toc-inline ol { margin: 0; padding: 0 14px 12px 34px; display: grid; gap: 3px; }
+.toc-inline a { color: var(--ink-soft); text-decoration: none; }
+
+/* ---------- Lesson footer ---------- */
+.lfoot { margin-top: 56px; display: grid; gap: 16px; }
+.done-card { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 18px; border: 1px solid var(--rule-soft); border-radius: 10px; background: var(--bg-raised); }
+.done-card p { margin: 0; color: var(--ink-soft); font-size: .92rem; }
+.btn { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--rule); background: var(--bg-raised); border-radius: 8px; padding: 9px 16px; cursor: pointer; font-size: .92rem; font-weight: 600; text-decoration: none; color: var(--ink); min-height: 40px; }
+.btn:hover { border-color: var(--blueprint); color: var(--blueprint); }
+.btn.primary { background: var(--blueprint); border-color: var(--blueprint); color: var(--bg); }
+.btn.primary:hover { filter: brightness(1.08); color: var(--bg); }
+.btn.is-done { background: var(--ok-wash); border-color: var(--ok); color: var(--ok); }
+.pager { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.pager a { display: grid; gap: 2px; padding: 12px 16px; border: 1px solid var(--rule-soft); border-radius: 10px; text-decoration: none; color: var(--ink); min-width: 0; }
+.pager a:hover { border-color: var(--blueprint); }
+.pager a small { font-family: var(--font-mono); font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-mute); }
+.pager a span { font-weight: 600; overflow-wrap: anywhere; }
+.pager .next { text-align: right; grid-column: 2; }
+
+/* ---------- Code tab ---------- */
+.files { display: grid; gap: 22px; }
+.file-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.file-list button { border: 1px solid var(--rule); background: var(--bg-raised); border-radius: 6px; padding: 5px 10px; font-family: var(--font-mono); font-size: .78rem; cursor: pointer; color: var(--ink-soft); }
+.file-list button[aria-pressed="true"] { border-color: var(--blueprint); color: var(--blueprint); background: var(--blueprint-wash); }
+.hint { font-size: .9rem; color: var(--ink-soft); margin: 0; }
+.hint code { font-family: var(--font-mono); font-size: .84em; background: var(--code-bg); padding: .08em .35em; border-radius: 4px; overflow-wrap: anywhere; }
+
+/* ---------- Quiz ---------- */
+.quiz { display: grid; gap: 28px; }
+.score { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-radius: 10px; background: var(--bg-raised); border: 1px solid var(--rule-soft); }
+.score b { font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+.score span { color: var(--ink-soft); font-size: .9rem; }
+.qgroup h2 { font-size: 1.1rem; margin: 0 0 4px; }
+.qgroup > p { margin: 0 0 14px; color: var(--ink-soft); font-size: .92rem; }
+.qcard { border: 1px solid var(--rule-soft); border-radius: 10px; background: var(--bg-raised); padding: 16px 18px; display: grid; gap: 12px; }
+.qcard + .qcard { margin-top: 12px; }
+.qcard .q { font-weight: 600; margin: 0; line-height: 1.5; }
+.qcard .q small { display: block; font-family: var(--font-mono); font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-mute); font-weight: 400; margin-bottom: 4px; }
+.opts { display: grid; gap: 6px; }
+.opt { display: grid; grid-template-columns: 26px 1fr; gap: 10px; align-items: start; text-align: left; border: 1px solid var(--rule-soft); background: var(--bg); border-radius: 8px; padding: 9px 12px; cursor: pointer; line-height: 1.45; font-size: .95rem; }
+.opt:hover:not(:disabled) { border-color: var(--blueprint); }
+.opt .k { font-family: var(--font-mono); font-size: .76rem; width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--rule); display: grid; place-items: center; color: var(--ink-mute); }
+.opt:disabled { cursor: default; }
+.opt.ok { border-color: var(--ok); background: var(--ok-wash); }
+.opt.ok .k { border-color: var(--ok); background: var(--ok); color: var(--bg); }
+.opt.bad { border-color: var(--bad); background: var(--bad-wash); }
+.opt.bad .k { border-color: var(--bad); background: var(--bad); color: var(--bg); }
+.opt.dim { opacity: .6; }
+.explain { margin: 0; font-size: .92rem; color: var(--ink-soft); padding: 10px 12px; border-left: 3px solid var(--rule); background: var(--bg-surface); border-radius: 0 6px 6px 0; }
+.explain b { color: var(--ink); }
+.explain.ok { border-left-color: var(--ok); } .explain.bad { border-left-color: var(--bad); }
+.qcard code, .explain code, .opt code { font-family: var(--font-mono); font-size: .85em; background: var(--code-bg); padding: .05em .3em; border-radius: 4px; overflow-wrap: anywhere; }
+
+/* ---------- Home ---------- */
+.home { display: grid; gap: 40px; }
+.hero { display: grid; gap: 14px; padding-top: 8px; }
+.hero h1 { margin: 0; font-size: clamp(2rem, 1.4rem + 2.6vw, 3rem); line-height: 1.08; font-weight: 800; letter-spacing: -.025em; text-wrap: balance; }
+.hero h1 em { font-style: normal; color: var(--blueprint); }
+.hero p { margin: 0; font-size: 1.12rem; color: var(--ink-soft); max-width: 60ch; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.stat { border: 1px solid var(--rule-soft); border-radius: 10px; padding: 14px 16px; background: var(--bg-raised); display: grid; gap: 4px; }
+.stat small { font-family: var(--font-mono); font-size: .66rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-mute); }
+.stat b { font-size: 1.6rem; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.stat .bar { margin-top: 6px; }
+.cta { display: flex; flex-wrap: wrap; gap: 10px; }
+.section-title { font-size: 1.25rem; margin: 0 0 12px; font-weight: 700; }
+.steps { counter-reset: s; display: grid; gap: 10px; padding: 0; margin: 0; list-style: none; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 30px 1fr; gap: 10px; color: var(--ink-soft); min-width: 0; }
+.steps li > div { min-width: 0; }
+.steps li::before { content: counter(s); font-family: var(--font-mono); font-size: .78rem; width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--rule); display: grid; place-items: center; color: var(--blueprint); }
+.lessons { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.lcard { display: grid; grid-template-rows: auto 1fr auto; gap: 8px; padding: 14px 16px; border: 1px solid var(--rule-soft); border-radius: 10px; background: var(--bg-raised); text-decoration: none; color: var(--ink); transition: border-color .15s var(--ease-out), transform .15s var(--ease-out); }
+.lcard:hover { border-color: var(--blueprint); transform: translateY(-1px); }
+.lcard .top { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: .72rem; color: var(--ink-mute); }
+.lcard h3 { margin: 0; font-size: 1.02rem; line-height: 1.35; font-weight: 650; }
+.lcard .bottom { display: flex; flex-wrap: wrap; gap: 6px; font-size: .76rem; }
+.pill { font-family: var(--font-mono); font-size: .68rem; letter-spacing: .04em; padding: 2px 8px; border-radius: 99px; border: 1px solid var(--rule); color: var(--ink-soft); white-space: nowrap; }
+.pill.build { border-color: var(--blueprint); color: var(--blueprint); }
+.pill.done { border-color: var(--ok); color: var(--ok); background: var(--ok-wash); }
+.foot { font-size: .82rem; color: var(--ink-mute); border-top: 1px solid var(--rule-soft); padding-top: 18px; line-height: 1.6; }
+
+.scrim { display: none; }
+
+@media (max-width: 1180px) {
+  .wrap.has-toc { grid-template-columns: minmax(0, 1fr); }
+  .toc { display: none; }
+  .toc-inline { display: block; }
+}
+@media (max-width: 900px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .side { position: fixed; top: 0; left: 0; bottom: 0; width: min(300px, 86vw); z-index: 40; transform: translateX(-102%); transition: transform .25s var(--ease-out); padding-top: calc(20px + env(safe-area-inset-top, 0px)); padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px)); height: 100%; }
+  .side.open { transform: none; box-shadow: 0 0 40px rgba(0,0,0,.25); }
+  .scrim.open { display: block; position: fixed; inset: 0; z-index: 30; background: rgba(10,12,24,.35); }
+  .menu-btn { display: inline-block; }
+  .wrap { padding-block: 22px 64px; }
+}
+@media (max-width: 520px) {
+  .pager { grid-template-columns: 1fr; }
+  .pager .next { grid-column: 1; }
+  .seg button { padding: 5px 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+</style>
+
+<div class="app">
+  <aside class="side" id="side" aria-label="Danh sách bài học">
+    <a class="brand" href="#tong-quan">
+      <small>AI Engineering from Scratch</small>
+      <b>Phase 00 · Cài đặt &amp; Công cụ</b>
+    </a>
+    <div class="side-progress">
+      <div class="row"><span>Tiến độ</span><span id="side-count">0/13</span></div>
+      <div class="bar"><i id="side-bar" style="width:0%"></i></div>
+    </div>
+    <ol class="nav" id="nav"></ol>
+    <div class="side-foot">Bản dịch tiếng Việt. Bản gốc tiếng Anh là chuẩn; tiến độ lưu trên trình duyệt này.</div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-btn" id="menu-btn" aria-controls="side" aria-expanded="false">☰ Bài học</button>
+      <div class="crumb" id="crumb"></div>
+      <div class="seg" id="lang-seg" role="group" aria-label="Ngôn ngữ bài học" hidden>
+        <button data-lang="vi" aria-pressed="true">Tiếng Việt</button>
+        <button data-lang="en" aria-pressed="false">English</button>
+      </div>
+    </header>
+    <div class="wrap" id="wrap">
+      <main class="col" id="view"></main>
+      <nav class="toc" id="toc" aria-label="Mục lục bài"></nav>
+    </div>
+  </div>
+</div>
+
+<script id="data" type="application/json">/*__DATA__*/</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/dockerfile.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+<script>
+/*__FIGJS__*/
+</script>
+<script>
+(function () {
+  'use strict';
+  var D = JSON.parse(document.getElementById('data').textContent);
+  var L = D.lessons;
+  var REPO = 'https://github.com/rohitg00/ai-engineering-from-scratch/blob/main/';
+
+  var store = {
+    get: function (k, d) { try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set: function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  };
+  var state = { lang: store.get('p00:lang', 'vi'), tab: 'doc', file: 0 };
+
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function inlineMd(s) { return esc(s).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>'); }
+  function slug(s) {
+    return s.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'd')
+      .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'muc';
+  }
+  function isDark() {
+    var t = document.documentElement.getAttribute('data-theme');
+    if (t) return t === 'dark';
+    return window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+
+  // ---------- progress ----------
+  function doneSet() { return store.get('p00:done', []); }
+  function isDone(id) { return doneSet().indexOf(id) >= 0; }
+  function toggleDone(id) {
+    var s = doneSet(), i = s.indexOf(id);
+    if (i >= 0) s.splice(i, 1); else s.push(id);
+    store.set('p00:done', s); renderSide();
+  }
+  function quizAnswers(id) { return store.get('p00:quiz:' + id, {}); }
+  function quizStats(les) {
+    if (!les.quiz) return null;
+    var a = quizAnswers(les.id), qs = les.quiz.questions, right = 0, answered = 0;
+    qs.forEach(function (q, i) { if (a[i] != null) { answered++; if (a[i] === q.correct) right++; } });
+    return { right: right, answered: answered, total: qs.length };
+  }
+
+  // ---------- lesson parsing ----------
+  var META_RE = /^\*\*(Type|Languages?|Prerequisites|Time):\*\*\s*(.*)$/;
+  function parse(md) {
+    var lines = md.split('\n'), title = '', tagline = [], meta = {}, body = [], i = 0;
+    for (; i < lines.length; i++) { if (lines[i].indexOf('# ') === 0) { title = lines[i].slice(2).trim(); i++; break; } }
+    while (i < lines.length && !lines[i].trim()) i++;
+    while (i < lines.length && lines[i].indexOf('>') === 0) { tagline.push(lines[i].replace(/^>\s?/, '')); i++; }
+    for (; i < lines.length; i++) {
+      var m = lines[i].match(META_RE);
+      if (m && body.join('').trim() === '') { meta[m[1].replace(/s$/, '')] = m[2].trim(); continue; }
+      body.push(lines[i]);
+    }
+    return { title: title, tagline: tagline.join(' ').trim(), meta: meta, body: body.join('\n') };
+  }
+  function metaOf(les) { return parse(les.en).meta; }
+  function minutes(les) { var m = (metaOf(les).Time || '').match(/(\d+)/); return m ? +m[1] : 0; }
+  function viTime(t) { return t.replace(/minutes?/i, 'phút').replace(/hours?/i, 'giờ'); }
+  function viPrereq(t) {
+    return t.replace(/^None$/i, 'Không có').replace(/Phase 0/g, 'Phase 00').replace(/Lessons (\d+) and (\d+)/, 'Bài $1 và $2')
+      .replace(/Lesson (\d+)/g, 'Bài $1').replace(/basic PyTorch familiarity/, 'biết cơ bản PyTorch')
+      .replace(/Dev Environment/g, 'Môi trường phát triển').replace(/Python Environments/g, 'Môi trường Python');
+  }
+  function typeVi(t) { return t === 'Learn' ? 'Lý thuyết' : 'Thực hành'; }
+
+  // ---------- sidebar ----------
+  function renderSide() {
+    var cur = currentId(), done = doneSet();
+    $('#nav').innerHTML = L.map(function (les) {
+      return '<li class="' + (done.indexOf(les.id) >= 0 ? 'done' : '') + '"><a href="#bai-' + les.id + '"' + (cur === les.id ? ' aria-current="page"' : '') + '>' +
+        '<span class="num">00.' + les.id + '</span><span>' + esc(les.title_vi) + '</span><span class="dot" aria-label="' + (done.indexOf(les.id) >= 0 ? 'Đã học xong' : 'Chưa xong') + '"></span></a></li>';
+    }).join('');
+    var n = L.filter(function (l) { return done.indexOf(l.id) >= 0; }).length;
+    $('#side-count').textContent = n + '/' + L.length;
+    $('#side-bar').style.width = (100 * n / L.length) + '%';
+  }
+
+  // ---------- routing ----------
+  function currentId() { var m = location.hash.match(/^#bai-(\d{2})$/); return m ? m[1] : null; }
+  function route() {
+    var id = currentId(), les = id && L.filter(function (l) { return l.id === id; })[0];
+    closeSide();
+    if (les) { if (route.last !== id) { state.tab = 'doc'; state.file = 0; } route.last = id; renderLesson(les); store.set('p00:last', id); }
+    else { route.last = null; renderHome(); }
+    renderSide();
+    window.scrollTo(0, 0);
+  }
+
+  // ---------- markdown ----------
+  if (window.marked) marked.setOptions({ gfm: true, breaks: false });
+  if (window.mermaid) {
+    mermaid.initialize({ startOnLoad: false, securityLevel: 'strict', theme: isDark() ? 'dark' : 'neutral', fontFamily: 'JetBrains Mono, monospace' });
+  }
+
+  function codeBlock(text, lang, label) {
+    var wrap = document.createElement('div'); wrap.className = 'code';
+    var head = document.createElement('div'); head.className = 'code-head';
+    var lab = document.createElement('span'); lab.textContent = label || lang || 'text';
+    var btn = document.createElement('button'); btn.className = 'copy'; btn.type = 'button'; btn.textContent = 'Sao chép';
+    var pre = document.createElement('pre'); var code = document.createElement('code');
+    code.textContent = text;
+    var hl = lang === 'jsonc' ? 'json' : lang === 'toml' ? 'ini' : lang;
+    if (window.hljs && hl && hljs.getLanguage(hl)) { try { code.innerHTML = hljs.highlight(text, { language: hl, ignoreIllegals: true }).value; } catch (e) {} }
+    btn.addEventListener('click', function () {
+      var ok = function () { btn.textContent = 'Đã chép'; setTimeout(function () { btn.textContent = 'Sao chép'; }, 1400); };
+      var fallback = function () { var r = document.createRange(); r.selectNodeContents(code); var s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = 'Đã chọn, nhấn ⌘C'; };
+      try { navigator.clipboard.writeText(text).then(ok, fallback); } catch (e) { fallback(); }
+    });
+    head.appendChild(lab); head.appendChild(btn); pre.appendChild(code); wrap.appendChild(head); wrap.appendChild(pre);
+    return wrap;
+  }
+
+  function renderMd(md, host, les) {
+    host.innerHTML = window.marked ? marked.parse(md) : '<pre>' + esc(md) + '</pre>';
+    host.querySelectorAll('pre > code').forEach(function (c) {
+      var pre = c.parentNode, m = (c.className || '').match(/language-([\w+-]+)/), lang = m ? m[1] : '';
+      var text = c.textContent.replace(/\n$/, '');
+      if (lang === 'mermaid') {
+        var mp = document.createElement('pre'); mp.className = 'mermaid'; mp.textContent = text.replace(/\\n/g, '<br/>');
+        pre.replaceWith(mp);
+      } else if (lang === 'figure') {
+        var f = document.createElement('div'); f.className = 'lesson-figure'; f.setAttribute('data-figure', text.trim());
+        pre.replaceWith(f);
+      } else {
+        pre.replaceWith(codeBlock(text, lang));
+      }
+    });
+    host.querySelectorAll('table').forEach(function (t) {
+      var w = document.createElement('div'); w.className = 'table-wrap'; t.parentNode.insertBefore(w, t); w.appendChild(t);
+    });
+    var seen = {};
+    host.querySelectorAll('h2, h3').forEach(function (h) {
+      var id = 's-' + slug(h.textContent); while (seen[id]) id += '-2'; seen[id] = 1; h.id = id;
+    });
+    host.querySelectorAll('a[href]').forEach(function (a) {
+      var href = a.getAttribute('href');
+      if (/^https?:/i.test(href)) { a.target = '_blank'; a.rel = 'noopener'; return; }
+      if (href.charAt(0) === '#') return;
+      var base = 'phases/' + D.phase + '/' + les.slug + '/docs/';
+      var parts = (base + href).split('/'), out = [];
+      parts.forEach(function (p) { if (p === '..') out.pop(); else if (p && p !== '.') out.push(p); });
+      var path = out.join('/'), m = path.match(new RegExp('^phases/' + D.phase + '/(\\d{2})-[^/]+/?(.*)$'));
+      if (m && m[1] !== les.id && (!m[2] || /^docs/.test(m[2]))) { a.setAttribute('href', '#bai-' + m[1]); return; }
+      a.setAttribute('href', REPO + path); a.target = '_blank'; a.rel = 'noopener';
+    });
+    if (window.mountLessonFigures) { try { mountLessonFigures(host); } catch (e) {} }
+    var mm = host.querySelectorAll('pre.mermaid');
+    if (mm.length && window.mermaid) { try { mermaid.run({ nodes: mm }).catch(function () {}); } catch (e) {} }
+  }
+
+  // ---------- TOC ----------
+  var spy;
+  function renderToc(host, inlineHost) {
+    var hs = host.querySelectorAll('h2, h3');
+    var items = Array.prototype.map.call(hs, function (h) {
+      return '<li><a class="' + h.tagName.toLowerCase() + '" href="#' + h.id + '" data-scroll="' + h.id + '">' + esc(h.textContent) + '</a></li>';
+    }).join('');
+    var h2only = Array.prototype.filter.call(hs, function (h) { return h.tagName === 'H2'; }).map(function (h) {
+      return '<li><a href="#' + h.id + '" data-scroll="' + h.id + '">' + esc(h.textContent) + '</a></li>';
+    }).join('');
+    $('#toc').innerHTML = hs.length ? '<h2>Trong bài này</h2><ol>' + items + '</ol>' : '';
+    if (inlineHost) inlineHost.innerHTML = hs.length ? '<details class="toc-inline"><summary>Mục lục bài</summary><ol>' + h2only + '</ol></details>' : '';
+    if (spy) spy.disconnect();
+    if ('IntersectionObserver' in window && hs.length) {
+      spy = new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          if (e.isIntersecting) {
+            $('#toc').querySelectorAll('a').forEach(function (a) { a.classList.toggle('active', a.getAttribute('data-scroll') === e.target.id); });
+          }
+        });
+      }, { rootMargin: '-80px 0px -70% 0px' });
+      hs.forEach(function (h) { spy.observe(h); });
+    }
+  }
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[data-scroll]');
+    if (!a) return;
+    var t = document.getElementById(a.getAttribute('data-scroll'));
+    if (t) { e.preventDefault(); t.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); }
+  });
+
+  // ---------- lesson view ----------
+  function renderLesson(les) {
+    var idx = L.indexOf(les), prev = L[idx - 1], next = L[idx + 1];
+    var lang = state.lang === 'en' || !les.vi ? 'en' : 'vi';
+    var p = parse(lang === 'vi' ? les.vi : les.en), meta = parse(les.en).meta;
+    var langs = (meta.Language || '').replace(/^--$/, '—');
+    var qn = les.quiz ? les.quiz.questions.length : 0;
+
+    $('#crumb').innerHTML = 'Phase 00 / <b>00.' + les.id + ' ' + esc(les.title_vi) + '</b>';
+    var seg = $('#lang-seg'); seg.hidden = state.tab !== 'doc';
+    seg.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-lang') === lang)); });
+    $('#wrap').classList.toggle('has-toc', state.tab === 'doc');
+    $('#toc').hidden = state.tab !== 'doc';
+
+    var v = $('#view');
+    v.innerHTML =
+      '<header class="lhead">' +
+        '<div class="eyebrow"><span>Bài 00.' + les.id + '</span><span>' + typeVi(meta.Type) + '</span>' + (lang === 'en' ? '<span>Bản gốc</span>' : '') + '</div>' +
+        '<h1>' + esc(p.title) + '</h1>' +
+        (p.tagline ? '<p class="tagline">' + inlineMd(p.tagline) + '</p>' : '') +
+        '<dl class="meta">' +
+          '<div><dt>Thời lượng</dt><dd>' + esc(viTime(meta.Time || '')) + '</dd></div>' +
+          '<div><dt>Ngôn ngữ</dt><dd>' + esc(langs || '—') + '</dd></div>' +
+          '<div><dt>Yêu cầu trước</dt><dd>' + esc(viPrereq(meta.Prerequisite || '')) + '</dd></div>' +
+        '</dl>' +
+      '</header>' +
+      '<div class="tabs" role="tablist">' +
+        '<button role="tab" data-tab="doc" aria-selected="' + (state.tab === 'doc') + '">Bài học</button>' +
+        '<button role="tab" data-tab="code" aria-selected="' + (state.tab === 'code') + '">Code<span class="count">' + les.code.length + '</span></button>' +
+        '<button role="tab" data-tab="quiz" aria-selected="' + (state.tab === 'quiz') + '">Kiểm tra<span class="count">' + qn + '</span></button>' +
+      '</div>' +
+      '<div id="tocinline"></div><div id="pane"></div>' +
+      '<footer class="lfoot">' +
+        '<div class="done-card"><p>' + (isDone(les.id) ? 'Bạn đã đánh dấu xong bài này.' : 'Đọc xong, chạy thử code và làm phần kiểm tra rồi đánh dấu hoàn thành.') + '</p>' +
+          '<button class="btn ' + (isDone(les.id) ? 'is-done' : 'primary') + '" id="done-btn" type="button">' + (isDone(les.id) ? '✓ Đã học xong' : 'Đánh dấu đã học xong') + '</button></div>' +
+        '<nav class="pager" aria-label="Chuyển bài">' +
+          (prev ? '<a class="prev" href="#bai-' + prev.id + '"><small>← Bài trước</small><span>' + esc(prev.title_vi) + '</span></a>' : '') +
+          (next ? '<a class="next" href="#bai-' + next.id + '"><small>Bài tiếp →</small><span>' + esc(next.title_vi) + '</span></a>' : '<a class="next" href="#tong-quan"><small>Hết Phase 00 →</small><span>Về trang tổng quan</span></a>') +
+        '</nav>' +
+      '</footer>';
+
+    v.querySelectorAll('[data-tab]').forEach(function (b) {
+      b.addEventListener('click', function () { state.tab = b.getAttribute('data-tab'); renderLesson(les); });
+    });
+    $('#done-btn').addEventListener('click', function () {
+      var wasDone = isDone(les.id); toggleDone(les.id);
+      var y = window.scrollY; renderLesson(les); window.scrollTo(0, y);
+      if (!wasDone && next) { /* giữ nguyên vị trí, người học tự bấm bài tiếp */ }
+    });
+
+    var pane = $('#pane');
+    if (state.tab === 'doc') {
+      var art = document.createElement('article'); art.className = 'prose'; art.lang = lang;
+      pane.appendChild(art);
+      renderMd(p.body, art, les);
+      renderToc(art, $('#tocinline'));
+    } else if (state.tab === 'code') {
+      $('#toc').innerHTML = '';
+      renderCode(les, pane);
+    } else {
+      $('#toc').innerHTML = '';
+      renderQuiz(les, pane);
+    }
+  }
+
+  function renderCode(les, pane) {
+    if (!les.code.length) { pane.innerHTML = '<p class="hint">Bài này không có file code đi kèm. Các lệnh cần chạy nằm ngay trong phần Bài học.</p>'; return; }
+    var f = les.code[state.file] || les.code[0];
+    pane.innerHTML = '<div class="files">' +
+      '<p class="hint">Các file trong <code>phases/' + D.phase + '/' + les.slug + '/</code>. Chạy từ thư mục gốc của repo, ví dụ <code>python3 phases/' + D.phase + '/' + les.slug + '/' + esc(les.code.filter(function (c) { return /\.py$/.test(c.path); }).map(function (c) { return c.path; })[0] || les.code[0].path) + '</code>.</p>' +
+      '<div class="file-list" role="group" aria-label="Chọn file">' + les.code.map(function (c, i) {
+        return '<button type="button" data-file="' + i + '" aria-pressed="' + (c === f) + '">' + esc(c.path) + '</button>';
+      }).join('') + '</div><div id="filebox"></div>' +
+      '<p class="hint"><a href="' + REPO + 'phases/' + D.phase + '/' + les.slug + '/' + esc(f.path) + '" target="_blank" rel="noopener">Mở file này trên GitHub ↗</a></p></div>';
+    $('#filebox').appendChild(codeBlock(f.content, f.lang, f.path));
+    pane.querySelectorAll('[data-file]').forEach(function (b) {
+      b.addEventListener('click', function () { state.file = +b.getAttribute('data-file'); renderCode(les, pane); });
+    });
+  }
+
+  function renderQuiz(les, pane) {
+    if (!les.quiz) { pane.innerHTML = '<p class="hint">Bài này chưa có câu hỏi kiểm tra.</p>'; return; }
+    var qs = les.quiz.questions, a = quizAnswers(les.id), st = quizStats(les);
+    var groups = [
+      { key: 'pre', title: 'Trước khi học', desc: 'Thử trả lời trước khi đọc để biết mình đang ở đâu. Sai cũng không sao.' },
+      { key: 'post', title: 'Sau khi học', desc: 'Kiểm tra lại sau khi đọc xong và chạy code.' }
+    ];
+    var html = '<div class="quiz">' +
+      '<div class="score"><div><b>' + st.right + '/' + st.total + '</b> <span>câu đúng · đã làm ' + st.answered + '/' + st.total + '</span></div>' +
+      '<button class="btn" type="button" id="quiz-reset">Làm lại từ đầu</button></div>' +
+      (les.quiz_lang === 'en' ? '<p class="hint">Câu hỏi của bài này chưa được dịch, đang hiển thị bản tiếng Anh.</p>' : '');
+    var n = 0;
+    groups.forEach(function (g) {
+      var items = qs.map(function (q, i) { return { q: q, i: i }; }).filter(function (x) { return (x.q.stage || 'post') === g.key; });
+      if (!items.length) return;
+      html += '<section class="qgroup"><h2>' + g.title + '</h2><p>' + g.desc + '</p>';
+      items.forEach(function (x) {
+        n++;
+        var chosen = a[x.i], answered = chosen != null, right = chosen === x.q.correct;
+        html += '<div class="qcard"><p class="q"><small>Câu ' + n + '</small>' + inlineMd(x.q.question) + '</p><div class="opts">' +
+          x.q.options.map(function (o, k) {
+            var cls = !answered ? '' : k === x.q.correct ? 'ok' : k === chosen ? 'bad' : 'dim';
+            return '<button type="button" class="opt ' + cls + '" data-q="' + x.i + '" data-k="' + k + '"' + (answered ? ' disabled' : '') + '><span class="k">' + 'ABCDEF'.charAt(k) + '</span><span>' + inlineMd(o) + '</span></button>';
+          }).join('') + '</div>' +
+          (answered ? '<p class="explain ' + (right ? 'ok' : 'bad') + '"><b>' + (right ? 'Chính xác.' : 'Chưa đúng. Đáp án: ' + 'ABCDEF'.charAt(x.q.correct) + '.') + '</b> ' + inlineMd(x.q.explanation || '') + '</p>' : '') +
+          '</div>';
+      });
+      html += '</section>';
+    });
+    pane.innerHTML = html + '</div>';
+    pane.querySelectorAll('.opt[data-q]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var cur = quizAnswers(les.id); cur[b.getAttribute('data-q')] = +b.getAttribute('data-k');
+        store.set('p00:quiz:' + les.id, cur);
+        var y = window.scrollY; renderQuiz(les, pane); window.scrollTo(0, y);
+      });
+    });
+    $('#quiz-reset').addEventListener('click', function () { store.set('p00:quiz:' + les.id, {}); renderQuiz(les, pane); });
+  }
+
+  // ---------- home ----------
+  function renderHome() {
+    $('#crumb').innerHTML = '<b>Tổng quan</b>';
+    $('#lang-seg').hidden = true;
+    $('#wrap').classList.remove('has-toc'); $('#toc').hidden = true; $('#toc').innerHTML = '';
+    var done = doneSet(), nDone = L.filter(function (l) { return done.indexOf(l.id) >= 0; }).length;
+    var total = L.reduce(function (s, l) { return s + minutes(l); }, 0);
+    var left = L.filter(function (l) { return done.indexOf(l.id) < 0; }).reduce(function (s, l) { return s + minutes(l); }, 0);
+    var nextL = L.filter(function (l) { return done.indexOf(l.id) < 0; })[0];
+    var last = store.get('p00:last', null);
+    var qRight = 0, qTotal = 0;
+    L.forEach(function (l) { var s = quizStats(l); if (s) { qRight += s.right; qTotal += s.total; } });
+    function hm(m) { var h = Math.floor(m / 60), r = m % 60; return h ? h + ' giờ' + (r ? ' ' + r + ' phút' : '') : r + ' phút'; }
+    var cmd = 'python3 phases/00-setup-and-tooling/01-dev-environment/code/verify.py --route beginner';
+
+    $('#view').innerHTML =
+      '<div class="home">' +
+        '<section class="hero">' +
+          '<div class="eyebrow"><span>AI Engineering from Scratch</span><span>Bản tiếng Việt</span></div>' +
+          '<h1>Phase 00: <em>Cài đặt &amp; Công cụ</em></h1>' +
+          '<p>Chuẩn bị sẵn môi trường cho mọi thứ phía sau. 13 bài, từ Python, Git, GPU, API key đến Docker, Linux, debug và profiling.</p>' +
+          '<div class="cta">' +
+            (nextL ? '<a class="btn primary" href="#bai-' + nextL.id + '">' + (nDone ? 'Học tiếp: ' : 'Bắt đầu: ') + '00.' + nextL.id + ' ' + esc(nextL.title_vi) + ' →</a>' : '<span class="btn is-done">✓ Bạn đã hoàn thành Phase 00</span>') +
+            (last && (!nextL || last !== nextL.id) ? '<a class="btn" href="#bai-' + last + '">Mở lại bài vừa xem (00.' + last + ')</a>' : '') +
+          '</div>' +
+        '</section>' +
+        '<section class="stats" aria-label="Tiến độ">' +
+          '<div class="stat"><small>Bài đã xong</small><b>' + nDone + '/' + L.length + '</b><div class="bar"><i style="width:' + (100 * nDone / L.length) + '%"></i></div></div>' +
+          '<div class="stat"><small>Thời gian còn lại</small><b>' + hm(left) + '</b><span class="hint">trên tổng ~' + hm(total) + '</span></div>' +
+          '<div class="stat"><small>Câu kiểm tra đúng</small><b>' + qRight + '/' + qTotal + '</b><span class="hint">qua ' + L.filter(function (l) { return l.quiz; }).length + ' bài</span></div>' +
+        '</section>' +
+        '<section><h2 class="section-title">Bắt đầu thế nào</h2><ol class="steps">' +
+          '<li><div>Cần sẵn <b>Git</b> và <b>Python 3.11+</b>. Các công cụ khác chỉ cài khi lộ trình của bạn cần.</div></li>' +
+          '<li><div>Clone repo gốc rồi, từ thư mục gốc của repo, chạy bước kiểm tra trước (preflight):<div id="cmd" style="margin-top:8px"></div></div></li>' +
+          '<li><div>Sửa mọi lỗi <b>bắt buộc</b> và chạy lại cho đến khi lệnh thoát với mã 0. Mục tùy chọn bị thiếu không tính là lỗi.</div></li>' +
+          '<li><div>Học lần lượt từng bài: đọc, chạy code trong tab <b>Code</b>, làm tab <b>Kiểm tra</b>, rồi đánh dấu xong.</div></li>' +
+        '</ol></section>' +
+        '<section><h2 class="section-title">13 bài học</h2><div class="lessons">' +
+          L.map(function (l) {
+            var m = metaOf(l), d = done.indexOf(l.id) >= 0, s = quizStats(l);
+            return '<a class="lcard" href="#bai-' + l.id + '"><div class="top"><span>00.' + l.id + '</span>' + (d ? '<span class="pill done">✓ Đã xong</span>' : '<span>' + esc(viTime(m.Time || '')) + '</span>') + '</div>' +
+              '<h3>' + esc(l.title_vi) + '</h3>' +
+              '<div class="bottom"><span class="pill ' + (m.Type === 'Build' ? 'build' : '') + '">' + typeVi(m.Type) + '</span>' +
+              ((m.Language || '--') !== '--' ? '<span class="pill">' + esc(m.Language) + '</span>' : '') +
+              (s && s.answered ? '<span class="pill">Quiz ' + s.right + '/' + s.total + '</span>' : '') + '</div></a>';
+          }).join('') +
+        '</div></section>' +
+        '<p class="foot">Nội dung gốc: <a href="https://aiengineeringfromscratch.com/catalog" target="_blank" rel="noopener">AI Engineering from Scratch</a> (giấy phép MIT, <a href="https://github.com/rohitg00/ai-engineering-from-scratch" target="_blank" rel="noopener">GitHub</a>). Bản dịch tiếng Việt do Claude thực hiện theo bảng thuật ngữ chung; khi có khác biệt, bản tiếng Anh (nút English trong mỗi bài) là chuẩn. Hình minh họa động lấy từ site gốc. Tiến độ và kết quả kiểm tra chỉ lưu trong trình duyệt này.</p>' +
+      '</div>';
+    $('#cmd').appendChild(codeBlock(cmd, 'bash'));
+  }
+
+  // ---------- chrome ----------
+  function openSide() { $('#side').classList.add('open'); $('#scrim').classList.add('open'); $('#menu-btn').setAttribute('aria-expanded', 'true'); }
+  function closeSide() { $('#side').classList.remove('open'); $('#scrim').classList.remove('open'); $('#menu-btn').setAttribute('aria-expanded', 'false'); }
+  $('#menu-btn').addEventListener('click', function () { $('#side').classList.contains('open') ? closeSide() : openSide(); });
+  $('#scrim').addEventListener('click', closeSide);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeSide();
+    if (e.target.closest && e.target.closest('input, textarea, select')) return;
+    var id = currentId(); if (!id || e.metaKey || e.ctrlKey || e.altKey) return;
+    var i = L.map(function (l) { return l.id; }).indexOf(id);
+    if (e.key === 'ArrowRight' && e.shiftKey && L[i + 1]) location.hash = 'bai-' + L[i + 1].id;
+    if (e.key === 'ArrowLeft' && e.shiftKey && L[i - 1]) location.hash = 'bai-' + L[i - 1].id;
+  });
+  $('#lang-seg').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-lang]'); if (!b) return;
+    state.lang = b.getAttribute('data-lang'); store.set('p00:lang', state.lang);
+    var les = L.filter(function (l) { return l.id === currentId(); })[0]; if (les) renderLesson(les);
+  });
+  window.addEventListener('hashchange', function () {
+    if (/^#s-/.test(location.hash)) return;
+    route();
+  });
+  route();
+})();
+</script>
